@@ -53,7 +53,7 @@ $app->post('/centros', function(Request $request, Response $response){
 // PUT Modificar usuario
 $app->put('/centros/modificar/{id}', function(Request $request, Response $response){
    $id_centro = $request->getAttribute('id');
-	$cif = $request->getAttribute('cif');
+	$cif = $request->getParam('cif');
    $nombre = $request->getParam('nombre');
    $telefono = $request->getParam('telefono');
    $email = $request->getParam('email');

@@ -124,11 +124,11 @@ $app->get('/espaciosall/{id}', function(Request $request, Response $response){
 
 // POST Crear nuevo usuario
 $app->post('/espacios', function(Request $request, Response $response){
-    $id=$request->getParam('id');
+    $id=intval($request->getParam('id'));
     $nombre = $request->getParam('nombre');
-    $precio = $request->getParam('precio');
-	$recargo = $request->getParam('recargo');
-    $tipo = $request->getParam('tipo');
+    $precio = doubleval($request->getParam('precio'));
+	$recargo = doubleval($request->getParam('recargo'));
+    $tipo = intval($request->getParam('tipo'));
 	$centro = $request->getParam('centro');
   
     $m = new MongoDB\Client('mongodb+srv://fralg100:canon100@clusterfran-65tu8.gcp.mongodb.net/test?retryWrites=true&w=majority');
@@ -145,60 +145,33 @@ $app->post('/espacios', function(Request $request, Response $response){
 
 // PUT Modificar usuario
 $app->put('/espacios/modificar/{id}', function(Request $request, Response $response){
-   $id_espacio = $request->getAttribute('id');
-   $nombre = $request->getParam('nombre');
-   $precio = $request->getParam('precio');
-	$recargo = $request->getParam('recargo');
-   $tipo = $request->getParam('tipo');
-	$centro = $request->getParam('centro');
-	$activo = $request->getParam('activo'); 
+    $id=intval($request->getAttribute('id'));
+    $nombre = $request->getParam('nombre');
+    $precio = doubleval($request->getParam('precio'));
+	$recargo = doubleval($request->getParam('recargo'));
+    $tipo = intval($request->getParam('tipo'));
+    $centro = $request->getParam('centro');
+    $activo = intval($request->getParam('activo'));
   
-  $sql = "UPDATE ESPACIOS SET
-	  NOMBRE = :nombre,
-          PRECIO = :precio,
-          TIPO = :tipo,
-		  CENTRO = :centro,
-		  ACTIVO = :activo
-        WHERE id = $id_espacio";
-     
-  try{
-    $db = new db();
-    $db = $db->conectDB();
-    $resultado = $db->prepare($sql);
-    $resultado->bindParam(':nombre', $nombre);
-    $resultado->bindParam(':precio', $precio);
-	  $resultado->bindParam(':recargo', $recargo);
-    $resultado->bindParam(':tipo', $tipo);
-	  $resultado->bindParam(':activo', $activo);
-	  $resultado->bindParam(':centro', $centro);
-    $resultado->execute();
-    echo json_encode("Espacio modificado.");  
-    $resultado = null;
-    $db = null;
-  }catch(PDOException $e){
-    echo '{"error" : {"text":'.$e->getMessage().'}';
-  }
+    $m = new MongoDB\Client('mongodb+srv://fralg100:canon100@clusterfran-65tu8.gcp.mongodb.net/test?retryWrites=true&w=majority');
+    $m->reservas->espacios->updateOne(
+        ['ID' => $id],
+        ['$set'=>[
+      'NOMBRE' => $nombre,
+      'PRECIO' => $precio,
+      'RECARGO' => $recargo,
+      'TIPO' => $tipo,
+      'CENTRO' => $centro,
+      'ACTIVO' => $activo,]
+    ]);
+    
 }); 
 // DELETE borar cliente 
 $app->delete('/espacios/delete/{id}', function(Request $request, Response $response){
-   $id_espacio = $request->getAttribute('id');
-   $sql = "DELETE FROM ESPACIOS WHERE ID = $id_espacio";
-     
-  try{
-    $db = new db();
-    $db = $db->conectDB();
-    $resultado = $db->prepare($sql);
-     $resultado->execute();
-    if ($resultado->rowCount() > 0) {
-      echo json_encode("Espacio eliminado.");  
-    }else {
-      echo json_encode("No existe espacio con este ID.");
-    }
-    $resultado = null;
-    $db = null;
-  }catch(PDOException $e){
-    echo '{"error" : {"text":'.$e->getMessage().'}';
-  }
+   $id_espacio = intval($request->getAttribute('id'));
+    $m = new MongoDB\Client('mongodb+srv://fralg100:canon100@clusterfran-65tu8.gcp.mongodb.net/test?retryWrites=true&w=majority');
+    $result = $m->reservas->espacios->deleteOne(['ID'=>$id_espacio]);
+    echo json_encode($result);
 }); 
 
 $app->run();
